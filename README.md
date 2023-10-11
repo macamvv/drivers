@@ -231,8 +231,14 @@ Se debe desarrollar una aplicación utilizando **React** y **Redux** que conteng
    -  Nombre.
    -  Escuderías.
 -  Cuando se le hace click a una Card deberá redirigir al detalle de ese driver específico.
--  Botones/Opciones para **filtrar** por team, y por si su origen es de la API o de la base de datos (creados por nosotros desde el formulario).
--  Botones/Opciones para **ordenar** tanto ascendentemente como descendentemente los drivers por orden alfabético y por fecha año de nacimiento.
+-  Botones/Opciones para **filtrar** 
+por team
+, y por si su origen es de la API o de la base de datos (creados por nosotros desde el formulario).
+
+
+-  Botones/Opciones para **ordenar** tanto
+ ascendentemente como descendentemente los drivers por orden alfabético y 
+ por fecha año de nacimiento.
 -  Paginado: el listado de drivers se hará por partes. Tu SPA debe contar con un paginado que muestre un total de 9 drivers por página.
 
 **⚠️ IMPORTANTE**: se deben mostrar tanto los drivers traidos desde la API como así también los de la base de datos, pero **NO** está permitido almacenar en la base de datos los drivers de la API. **Solamente se pueden guardar aquellos creados desde el form**.
