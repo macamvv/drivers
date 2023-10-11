@@ -10,6 +10,8 @@ module.exports = router;
 
 const defaultImage = "https://cdn-icons-png.flaticon.com/512/164/164443.png";
 
+// busca todos los drivers
+// y buscar los drivers por nombre
 router.get('/drivers', async (req, res) => {
     const { name } = req.query;
     let serializedDrivers = [];
@@ -41,6 +43,7 @@ router.get('/drivers', async (req, res) => {
         });
     }
 
+    // modifico el objeto de la API para que se corresponda con la data de la base de datos
     serializedDrivers = driversFromApi.data.map(driver => (
         {
             id: driver.id,
@@ -66,6 +69,7 @@ router.get('/drivers', async (req, res) => {
     return res.status(200).json(allDrivers)
 });
 
+// busca driver por id
 router.get('/drivers/:idDriver', async (req, res) => {
     try {
         const { idDriver } = req.params;
@@ -111,15 +115,11 @@ router.get('/drivers/:idDriver', async (req, res) => {
 
 
     } catch (error) {
-        if(error.response.status === 404){
-            res.status(404).send({})
-        }
-        else { res.status(500).send(error.message)} // error que proviene del axios
+        res.status(500).send(error.message) // error que proviene del axios
     }
-
-
 });
 
+// crear driver
 router.post("/drivers", async (req, res) => {
     const { nombre, apellido, fecha_de_nacimiento, descripcion, nacionalidad, imagen, teams } = req.body;
     let id;
@@ -137,10 +137,12 @@ router.post("/drivers", async (req, res) => {
     }
 
     try {
+        // crea driver en BD
         const newDriver = await Driver.create({
             id, nombre, apellido, fecha_de_nacimiento, descripcion, nacionalidad, imagen
         })
     
+        //crea la relacion entre los teams y el driver recien creado
         for (let index = 0; index < teams.length; index++) {
             const team = teams[index];
             await driverTeam.create({ driver_id: newDriver.id, team_id: team });

@@ -4,6 +4,8 @@ const { conn, team } = require('./src/db.js');
 const PORT = 3000;
 
 conn.sync({ force: false }).then(async () => {
+  // Carga los teams en la base de datos sacandolos de la API db.json
+  
   const teamsCount = await team.count();
   if(!teamsCount) {
     const driversFromApi = await axios.get("http://localhost:5000/drivers");
@@ -18,7 +20,9 @@ conn.sync({ force: false }).then(async () => {
     const allTeamsToCreate = Array.from(teamsNotRepeated)
     for (let index = 0; index < allTeamsToCreate.length; index++) {
       const teamName = allTeamsToCreate[index];
-      await team.create({nombre: teamName});
+
+     
+      await team.create({nombre: teamName});  // con el modelo team crea en la BD
     }
 
   }
