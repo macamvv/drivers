@@ -1,8 +1,9 @@
-import React, { createElement, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NavBar from '../components/NavBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getTeams, createDriver } from '../features/mainSlice';
+import { getAllTeams } from '../redux/Actions/DriversActions';
+import { mainService } from "../features/mainService";
 
 const initialForm = {
   nombre:"",
@@ -14,11 +15,9 @@ const initialForm = {
   teams: [],
 };
 
-
-
 const AddDriver = () => {
-  const state = useSelector(state => state.mainData);
-  const { teams, driverAdded, isLoading, isError, isSuccess } = state;
+  const state = useSelector(state => state);
+  const { teams } = state;
   const dispatch = useDispatch();
   const navigate  = useNavigate();
 
@@ -27,6 +26,19 @@ const AddDriver = () => {
   const [inputValue, setInputValue] = useState('');
   const [selectedEscuderias, setSelectedEscuderias] = useState([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [inputFocus, setInputFocus] = useState(null);
+
+  // VALIDATION OBJECT
+  const [validation, setValidation] = useState({
+    nombre:null,
+    imagen:null,
+    apellido:null,
+    nacionalidad:null,
+    descripcion:null,
+    fechaDeNacimiento: null,
+    teams: null,
+  });
+
 
   const [escuderiasSelect, setEscuderiasSelect] = useState([]);
 
@@ -63,34 +75,47 @@ const AddDriver = () => {
       teams: newSelectedEscuderias,
     })
   };
+  const handleChange = (e) => {
+    let value = e.target.value;
 
-  const [validation, setValidation] = useState({
-    nombre:null,
-    imagen:null,
-    apellido:null,
-    nacionalidad:null,
-    descripcion:null,
-    fechaDeNacimiento: null,
-    teams: null,
-  });
+    if(e.target.name === "nacionalidad" && value) {
+      value = value[0].toUpperCase() + value.slice(1);
+    }
 
-  const handleChange = (e) =>{
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     })
 
     setValidation({
       ...validation,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     })
   };
+
+  const handleOnFocus = (e) => {
+    setInputFocus(true)
+  }
+
+  const handleOnBlur = (e) => {
+    setTimeout(() => {
+      setInputFocus(false)  
+    }, 200);
+  }
 
   const imageIsUrl = () => {
     if(validation.imagen && validation.imagen.length > 0) {
       const expresionRegularURL = /^(ftp|http|https):\/\/[^ "]+$/;
 
       return !expresionRegularURL.test(validation.imagen);
+    }
+  }
+
+  const onlyHasLetters = (key) => {
+    if(validation[key] && validation[key].length > 0) {
+      const expresionRegularURL = /^[a-zA-Z]+$/;
+
+      return !expresionRegularURL.test(validation[key]);
     }
   }
 
@@ -128,16 +153,14 @@ const AddDriver = () => {
       ...newValidation,
     })
 
-    if(imageIsUrl() || dobIsFormatted()) {
+    if(imageIsUrl() || dobIsFormatted() || onlyHasLetters("nombre") || onlyHasLetters("apellido") || onlyHasLetters("nacionalidad")) {
       ableToSend = false;
     }
 
     if(ableToSend) {
       let finalObj = {...form, fecha_de_nacimiento: form.fechaDeNacimiento, teams: selectedEscuderias.map(e => e.id)};
-      dispatch(createDriver(finalObj))
-      setTimeout(()=>{
-        navigate("/home");
-      },1000)
+      await mainService.createDriver(finalObj)
+      navigate("/home");
     } else {
       alert("There was an error trying to create driver")
     }
@@ -147,7 +170,7 @@ const AddDriver = () => {
 
   // CARGA ESCUDERIAS
   useEffect(() => {
-    dispatch(getTeams());
+    dispatch(getAllTeams());
   }, []);
 
   useEffect(() => {
@@ -165,16 +188,19 @@ const AddDriver = () => {
               <input type="text" name='nombre' placeholder='What is the name of the driver?' onChange={handleChange} value={form.nombre} />
               {/* NOMBRE VALIDATION */}
               {validation.nombre !== null && validation.nombre.length === 0 && <span className='validation-span'>Please tell us what is the name of the driver</span>}
+              {onlyHasLetters("nombre") && <span className='validation-span'>Please only use letters for the name</span>}
             </div>
             <div className='w-50 column'>
               <input type="text" name='apellido' placeholder='What is the surname of the driver?' onChange={handleChange} value={form.apellido} />
               {/* APELLIDO VALIDATION */}
               {validation.apellido !== null && validation.apellido.length === 0 && <span className='validation-span'>Please write the lastname of the driver </span>}
+              {onlyHasLetters("apellido") && <span className='validation-span'>Please only use letters for the last name</span>}
             </div>
             <div className='w-50 column'>
               <input type="text" name='nacionalidad' placeholder='What is the nationality of the driver?' onChange={handleChange} value={form.nacionalidad} />
               {/* NACIONALIDAD VALIDATION */}
               {validation.nacionalidad !== null && validation.nacionalidad.length === 0 && <span className='validation-span'>Please write the nationality of the driver </span>}
+              {onlyHasLetters("nacionalidad") && <span className='validation-span'>Please only use letters for the nationaliy</span>}
             </div>
 
             <div className='w-50 column'>
@@ -203,7 +229,19 @@ const AddDriver = () => {
                 placeholder="Buscar escuderia"
                 value={inputValue}
                 onChange={handleInputChange}
+                onBlur={handleOnBlur}
+                onFocus={handleOnFocus}
               />
+              {inputValue.length === 0 && inputFocus && (
+                <ul className="suggestions">
+                  {escuderiasSelect.map((suggestion, index) => (
+                    <li key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                      {suggestion.nombre}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               {inputValue.length > 0 && (
                 <ul className="suggestions">
                   {filteredSuggestions.map((suggestion, index) => (

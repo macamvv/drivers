@@ -1,23 +1,22 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-//import { getDrivers } from '../features/mainSlice';
+import { useSelector } from 'react-redux';
 import { FilterContext } from '../contexts/filtersContext';
 
 
 //EN ESTE ARCHIVO SE DETERMINA LA CANTIDAD DE DRIVERS QUE VAN A FIGURAR EN LA PAGINA.
 // EN TOTAL DEBEN FIGURAR 9
 const Pagination = () => {
-
-  const dispatch = useDispatch();
   const data = useContext(FilterContext);
-  const { setPageStart, setPageLimit, pageLimit } = data;
+  const { setPageStart, setPageLimit } = data;
 
-  const state = useSelector(state => state.mainData);
+  const state = useSelector(state => state);
   const { drivers } = state;
 
   const [pageNumbers, setPageNumbers] = useState([]);
+  const [activePage, setActivePage] = useState(1);
 
-  const handlePagination = (e) =>{
+  const handlePagination = (e, clickedPage) => {
+    setActivePage(clickedPage)
     setPageStart(e.target.name);
     setPageLimit(Number(e.target.name) + 9);
   };
@@ -40,15 +39,16 @@ const Pagination = () => {
     }else{
       setPageNumbers([]);
     }
+    setActivePage(1)
   }, [drivers]);
 
-  return ( 
+  return (
     <div className="pagination-wrapper-container">
       <div className="pagination-wrapper d-flex align-items-center justify-content-center">
         {pageNumbers.length > 0 && pageNumbers.map((el, index) => {
           pageIndex += 9;
           return (
-            <button className="pag-btn" name={Number(pageIndex)} onClick={handlePagination}>{el + 1}</button>
+            <button className={`pag-btn ${activePage === (el + 1) ? "active-page" : ""}`} name={Number(pageIndex)} onClick={(e) => handlePagination(e, el + 1)}>{el + 1}</button>
           )
         })}
       </div>

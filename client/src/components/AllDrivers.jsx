@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getDrivers } from '../features/mainSlice';
+import { getAllDrivers } from '../redux/Actions/DriversActions';
+
 import DriverSmallCard from '../utils/driverSmallCard';
 import { FilterContext } from '../contexts/filtersContext';
 
@@ -9,13 +10,13 @@ const AllDrivers = () => {
   const data = useContext(FilterContext);
   const { pageStart, pageLimit } = data;
 
-  const state = useSelector(state => state.mainData);
+  const state = useSelector(state => state);
   const { drivers } = state;
 
   const [driversData, setDriversData] = useState([]);
 
   useEffect(() => {
-    dispatch(getDrivers());
+    dispatch(getAllDrivers())
   }, []);
 
   useEffect(() => {

@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getDrivers, getDriversByName } from '../features/mainSlice';
+import { getAllDrivers, getDriversByName } from '../redux/Actions/DriversActions';
+
 import { FilterContext } from '../contexts/filtersContext';
 
 const NavBar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [theme, setTheme] = useState("light");
   const [input, setInput] = useState(null);
   const data = useContext(FilterContext);
   const { setNavbarSearchValue } = data;
@@ -15,22 +15,14 @@ const NavBar = () => {
   const handleDriversByName = async (e) => {
     setNavbarSearchValue(input)
     if(!input) {
-      dispatch(getDrivers());  
+      dispatch(getAllDrivers());  
     } else {
       dispatch(getDriversByName(input));
     }
   };
 
-  useEffect(() => {
-    const validateTheme = localStorage.getItem("theme");
-    if(!validateTheme){
-      localStorage.setItem("theme", "light");
-    }else{
-      setTheme(validateTheme);
-    }
-  }, []);
-
   return ( 
+    
     <div className={`navbar-wrapper`}>
       <div className='f1-icon'>
         <div>
@@ -40,13 +32,18 @@ const NavBar = () => {
           <span>Drivers</span>
         </div>
       </div>
+      {/* searchBar */}
       <div className='navbar-input d-flex align-items-center position-relative'>
-        <input type="text" placeholder='Enter drivers last name...' className={`position-relative`} onChange={(e)=> setInput(e.target.value)} value={input} style={{boxShadow: theme === "dark" ? "none" : "0 0 0.5rem lightgrey", backgroundColor:"white"}} onKeyDown={(e)=> e.key === "Enter" && handleDriversByName()}/>
+        <input type="text" placeholder='Enter drivers last name...' className={`position-relative`} onChange={(e)=> setInput(e.target.value)} value={input} style={{backgroundColor:"white"}} 
+          onKeyDown={(e)=> e.key === "Enter" && handleDriversByName()}/>
+        
         <div className='nav-bar-search position-absolute'>
-          <img src="/images/search.svg" alt="abc" width={25} height={25} onClick={handleDriversByName}/>
+          <img src="/images/search.svg" alt="abc" width={25} height={25} 
+            onClick={handleDriversByName}/>
         </div>
       </div>
 
+      {/* gitHub Linkedin */}
       <div className='navbar-icons'>
         <div className="button-slide-g">
           <div className='navbar-icons-div-g' onClick={()=> window.open("https://www.github.com/macamvv", "window", "width=800, height=800")}>
@@ -62,7 +59,7 @@ const NavBar = () => {
           <span>Linkedin</span>
         </div>
       </div>
-
+      {/* formulario */}
       <div className='new-driver'>
         <button onClick={()=> navigate("/add-driver")}>Add Driver</button>
       </div>

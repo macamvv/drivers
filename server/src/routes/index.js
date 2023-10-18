@@ -18,7 +18,11 @@ router.get('/drivers', async (req, res) => {
     let drivers;
     let allDrivers;
 
+    //API
+
     let driversFromApi = await axios.get("http://localhost:5000/drivers")
+
+    // DB POR NOMBRE
 
     if(name) {
         drivers = await Driver.findAll({
@@ -32,10 +36,11 @@ router.get('/drivers', async (req, res) => {
               }],
         })
 
+        //API POR NOMBRE
     driversFromApi.data = driversFromApi.data.filter(driver => (
-            driver.name.surname.includes(name) || driver.name.surname.includes(name.toLowerCase)
+        driver.name.surname.toLowerCase().includes(name.toLowerCase())
         ))
-    } else {
+    } else { 
         drivers = await Driver.findAll({
             include: [{
                 model: Team,
@@ -69,11 +74,12 @@ router.get('/drivers', async (req, res) => {
     return res.status(200).json(allDrivers)
 });
 
-// busca driver por id
+// busca driver por id (SINGLE DRIVER)
 router.get('/drivers/:idDriver', async (req, res) => {
     try {
         const { idDriver } = req.params;
 
+        //DB
         const driverDataBase = await Driver.findByPk(idDriver, {
             include: [{
                 model: Team,
@@ -96,6 +102,8 @@ router.get('/drivers/:idDriver', async (req, res) => {
             }
             return res.status(200).send(serializedDriver)
         };
+
+        //API
         const driverFromApi = await axios.get(`http://localhost:5000/drivers/${idDriver}`) 
 
         if (driverFromApi === null) throw new Error({error: []})
@@ -119,10 +127,12 @@ router.get('/drivers/:idDriver', async (req, res) => {
     }
 });
 
+
 // crear driver
 router.post("/drivers", async (req, res) => {
     const { nombre, apellido, fecha_de_nacimiento, descripcion, nacionalidad, imagen, teams } = req.body;
     let id;
+
     const dbDrivers = await Driver.findAll({
         order: [
             ['id', 'DESC'],

@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getTeams, getDriversByTeam, getDriversBySource, getDrivers, getDriversByTeamAndSource, sortDriversByLastName } from '../features/mainSlice';
+import { getAllTeams, getAllDrivers, getDriversByTeam, getDriversBySource, getDriversByTeamAndSource, sortDriversByLastName } from '../redux/Actions/DriversActions';
 import { FilterContext } from '../contexts/filtersContext';
-
 
 const Filters = () => {
   const refSelect = useRef();
@@ -12,45 +11,49 @@ const Filters = () => {
   const refSelect3 = useRef();
   const refOption3 = useRef();
   const dispatch = useDispatch();
-  const state = useSelector(state => state.mainData);
+  const state = useSelector(state => state);
   const { teams } = state;
 
   const [teamFilter, setTeamFilter] = useState(null);
   const [sourceFilter, setSourceFilter] = useState(null);
+  const [sortFilter, setSortFilter] = useState(null);
 
   const data = useContext(FilterContext);
   const { setPageStart, setPageLimit, navBarSearchValue } = data;
 
   const sortByLastName = (e) =>{
-    dispatch(sortDriversByLastName(e.target.value)) 
+    setSortFilter(e.target.value);
+    dispatch(sortDriversByLastName(e.target.value))
+    setPageStart(0);
+    setPageLimit(9);
   };
 
-  const filterByTeams = (e) =>{
+  const filterByTeams = (e) => {
     setTeamFilter(e.target.value);
     if(sourceFilter && sourceFilter !== "mix") {
-      dispatch(getDriversByTeamAndSource({ team: e.target.value, source: sourceFilter })) 
+      dispatch(getDriversByTeamAndSource({ teamName: e.target.value, source: sourceFilter, order: sortFilter })) 
     } else {
-      dispatch(getDriversByTeam(e.target.value));
+      dispatch(getDriversByTeam({ teamName: e.target.value, order: sortFilter }));
     }
-    refSelect3.current.value = refOption3.current.value;
+    setPageStart(0);
+    setPageLimit(9);
   };
 
   const filteredByCreated = (e) => {
     setSourceFilter(e.target.value);
     if(teamFilter) {
       if(e.target.value === "mix") {
-        dispatch(getDriversByTeam(teamFilter));
+        dispatch(getDriversByTeam({ teamName: teamFilter, order: sortFilter }));
       } else {
-        dispatch(getDriversByTeamAndSource({ team: teamFilter, source: e.target.value })) 
+        dispatch(getDriversByTeamAndSource({ teamName: teamFilter, source: e.target.value, order: sortFilter })) 
       }
     } else {
       if(e.target.value === "mix") {
-        dispatch(getDrivers());
+        dispatch(getAllDrivers(sortFilter));
       } else {
-        dispatch(getDriversBySource(e.target.value));
+        dispatch(getDriversBySource({ source: e.target.value, order: sortFilter }));
       }
     }
-    refSelect3.current.value = refOption3.current.value;
     setPageStart(0);
     setPageLimit(9);
   };
@@ -58,7 +61,7 @@ const Filters = () => {
   const resetFilters = () => {
     setTeamFilter(null);
     setSourceFilter(null);
-    dispatch(getDrivers());
+    dispatch(getAllDrivers());
     refSelect.current.value = refOption.current.value;
     refSelect2.current.value = refOption2.current.value;
     refSelect3.current.value = refOption3.current.value;
@@ -67,7 +70,7 @@ const Filters = () => {
   };
 
   useEffect(() => {
-    dispatch(getTeams());
+    dispatch(getAllTeams());
   }, []);
 
   useEffect(() => {
@@ -83,6 +86,8 @@ const Filters = () => {
   return ( 
     <div className='filters-wrapper'>
       <div className='filters-container'>
+
+      {/*FILTRO POR LETRA*/ }
         <div className='filters-select'>
           <select ref={refSelect3} name="" id="" onChange={sortByLastName} defaultValue="disabled">
             <option ref={refOption3} value="disabled" disabled>Alphabetically</option>
@@ -90,6 +95,9 @@ const Filters = () => {
               <option value="desc">Z-A</option>
             </select>
         </div>
+
+              {/*FILTRO POR TEAMS*/ }
+
         <div className='filters-select'>
           <select ref={refSelect} name="" id="" onChange={filterByTeams} defaultValue="disabled">
             <option ref={refOption} value="disabled" disabled>By Team</option>
@@ -100,6 +108,8 @@ const Filters = () => {
             }
           </select>
         </div>
+              {/*FILTRO POR CREACION*/ }
+
         <div className='filters-select'>
           <select ref={refSelect2} name="" id="" defaultValue="disabled" onChange={filteredByCreated}>
             <option ref={refOption2} value="disabled" disabled>Created In</option>

@@ -8,8 +8,10 @@ const {
 const DriverModel = require('./models/Driver')
 const TeamModel = require('./models/Team')
 
+//CONECTA A LA DB
 const sequelize = new Sequelize(`postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/drivers`, {logging: false});
 
+// POR PRIMERA VEZ CREA LAS TABLAS
 DriverModel(sequelize)
 TeamModel(sequelize)
 const { driver, team } = sequelize.models;

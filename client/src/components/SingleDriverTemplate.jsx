@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getTeams, getDrivers, getDriverById } from '../features/mainSlice';
+import { getDriverById } from '../redux/Actions/DriversActions';
 
 const SingleDriverTemplate = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const state = useSelector(state => state.mainData);
+  const state = useSelector(state => state);
   const { drivers } = state;
 
   const { id } = useParams();
@@ -18,9 +18,9 @@ const SingleDriverTemplate = () => {
   return ( 
     <div className="single-driver-wrapper">
       <div className='w-60 sr-details'>
-        <div className='d-flex align-items-center' style={{marginBottom:"2rem", color:"#777777", cursor:"pointer"}}>
-          <img src="/images/go-back.svg" alt="abc" />
-          <span onClick={()=> navigate("/home")}>Go Back Home</span>
+        <div className='d-flex align-items-center' style={{marginBottom:"2rem", color:"#777777", cursor:"pointer"}} onClick={()=> navigate("/home")}>
+          <img src="/images/go-back.svg" alt="abc" style={{marginTop: "12px "}}/>
+          <span>Go Back Home</span>
         </div>
         <div className="sr-title">
           <p>{`${drivers[0]?.nombre} ${drivers[0]?.apellido} (${drivers[0]?.nacionalidad})`}</p>
@@ -40,7 +40,7 @@ const SingleDriverTemplate = () => {
                 : null
             }
           </div>
-          <p style={{lineHeight:"28px"}}>{drivers[0]?.descripcion}</p>
+          <p style={{ lineHeight:"28px" }}>{drivers[0]?.descripcion}</p>
         </div>
       </div>
     </div>

@@ -1176,3 +1176,7 @@ button:hover {
 .pagination-wrapper-container {
   margin-bottom: 10px;
 }
+
+.active-page {
+  background-color: lightblue;
+}
